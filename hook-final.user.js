@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         网络追踪 + CryptoJS 完整 Hook
+// @name         最终版: 网络追踪 + CryptoJS 完整 Hook
 // @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  运行时从 Encryptor 实例直接推断模式，精准关联网络请求
@@ -534,10 +534,17 @@
             // 内容关联：仅当请求体或 URL 真正包含密文（含多种变体）才关联
             const bodyStr = serializeBody(data);
             let cryptoInfos = matchCryptoInText(xhr.url, bodyStr);
-            // Fallback: 最近一次RSA操作 + 短窗口 + 有字符串请求体，则弱关联一次
+            // Fallback 1：最近一次RSA操作 + 短窗口 + 有字符串请求体，则弱关联一次
             if ((!cryptoInfos || !cryptoInfos.length) && recentCryptoOp && recentCryptoOp.algorithm === 'RSA') {
                 const within = Date.now() - cryptoOpTimestamp;
                 if (within > 0 && within < 1200 && typeof bodyStr === 'string' && bodyStr.length) {
+                    cryptoInfos = [recentCryptoOp];
+                }
+            }
+            // Fallback 2：对称加密短窗弱关联（body 中出现疑似密文片段）
+            if ((!cryptoInfos || !cryptoInfos.length) && recentCryptoOp && recentCryptoOp.operation === '对称加密') {
+                const within = Date.now() - cryptoOpTimestamp;
+                if (within > 0 && within < 800 && typeof bodyStr === 'string' && /[A-Za-z0-9+\/=:%]{16,}/.test(bodyStr)) {
                     cryptoInfos = [recentCryptoOp];
                 }
             }
@@ -573,6 +580,12 @@
         if ((!cryptoInfos || !cryptoInfos.length) && recentCryptoOp && recentCryptoOp.algorithm === 'RSA') {
             const within = Date.now() - cryptoOpTimestamp;
             if (within > 0 && within < 1200 && typeof bodyStr === 'string' && bodyStr.length) {
+                cryptoInfos = [recentCryptoOp];
+            }
+        }
+        if ((!cryptoInfos || !cryptoInfos.length) && recentCryptoOp && recentCryptoOp.operation === '对称加密') {
+            const within = Date.now() - cryptoOpTimestamp;
+            if (within > 0 && within < 800 && typeof bodyStr === 'string' && /[A-Za-z0-9+\/=:%]{16,}/.test(bodyStr)) {
                 cryptoInfos = [recentCryptoOp];
             }
         }
