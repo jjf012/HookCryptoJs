@@ -93,6 +93,14 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
         }
+        #monitor.collapsed {
+            width: 260px; max-height: none; padding: 10px 12px; overflow: visible;
+        }
+        #monitor.collapsed #list { display: none; }
+        #monitor .bar { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        #monitor .title { margin:0; font-size:16px; font-weight:600; color:#4a90e2; }
+        .btn-min { background:#2b2b3d; color:#a8c7fa; border:1px solid #4a90e2; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px; }
+        .btn-min:hover { background:#334; }
         #monitor h3 {
             margin: 0 0 15px 0; color: #4a90e2; font-size: 18px;
             font-weight: 600; text-align: center;
@@ -183,8 +191,13 @@
         const panel = document.createElement('div');
         panel.id = 'monitor';
         panel.innerHTML = `
-            <h3>🔐 最终版监控</h3>
-            <div>
+            <div class="bar">
+                <h3 class="title">🔐 最终版监控</h3>
+                <div>
+                    <button class="btn-min" id="toggle-min">收缩</button>
+                </div>
+            </div>
+            <div style="margin:6px 0;">
                 <button class="btn" onclick="document.getElementById('list').innerHTML='';document.getElementById('cnt').textContent='0';">清空</button>
                 <button class="btn btn-danger" onclick="console.log('请求数组:', window.__capturedRequests);">导出</button>
                 <span style="color:#888; margin-left:10px;">请求: <span id="cnt">0</span></span>
@@ -192,6 +205,21 @@
             <div id="list"></div>
         `;
         document.body.appendChild(panel);
+
+        // 初始化折叠状态
+        try {
+            const st = localStorage.getItem('__monitor_min');
+            if (st === '1') panel.classList.add('collapsed');
+        } catch(_) {}
+        const btn = panel.querySelector('#toggle-min');
+        if (btn) {
+            btn.addEventListener('click', ()=>{
+                panel.classList.toggle('collapsed');
+                btn.textContent = panel.classList.contains('collapsed') ? '展开' : '收缩';
+                try { localStorage.setItem('__monitor_min', panel.classList.contains('collapsed') ? '1' : '0'); } catch(_) {}
+            });
+            btn.textContent = panel.classList.contains('collapsed') ? '展开' : '收缩';
+        }
     }
 
 
