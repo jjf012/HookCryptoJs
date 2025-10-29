@@ -51,6 +51,16 @@
 ## 注意事项
 - 仅用于授权的测试/调试场景；请勿在未获许可的网站上使用。
 - 对二进制请求体暂未做特征索引，可能会漏匹配。
+- 加密mode无法自动猜测出来，只能手动尝试。好在mode的选择也很有限。
+- 可能会有未知的bug，等碰到网站再更新吧。
+
+## 使用截图
+
+以 https://github.com/0ctDay/encrypt-decrypt-vuls/ 的靶场为例。
+
+<img width="675" height="432" alt="image" src="https://github.com/user-attachments/assets/0fcf0a1a-aa10-47b0-8658-121791397be0" />
+
+<img width="1021" height="308" alt="image" src="https://github.com/user-attachments/assets/121089fd-b838-4438-b9eb-7ce9564c7dc1" />
 
 ## 许可证
 MIT
